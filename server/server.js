@@ -16,7 +16,9 @@ const rawClientUrl = (process.env.CLIENT_URL || '').replace(/\/$/, '');
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'http://localhost:5176',
   rawClientUrl,
+  'https://career-path-sigma-gules.vercel.app' 
 ].filter(Boolean);
 
 const corsOptions = {
