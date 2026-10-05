@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://career-path-ge2u.onrender.com/api',
         changeOrigin: true,
       },
     },
