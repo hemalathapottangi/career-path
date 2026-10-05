@@ -10,26 +10,32 @@ const app = express();
 connectDB();
 
 // ── CORS ──
+// Strip trailing slash so origin comparison always works
+const rawClientUrl = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  process.env.CLIENT_URL,           // e.g. https://career-path-sigma-gules.vercel.app
-].filter(Boolean);                  // remove undefined if CLIENT_URL not set
+  rawClientUrl,
+].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Allow no-origin requests (Postman, curl, mobile)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS blocked: origin ${origin} not allowed`));
+    // Strip any accidental trailing slash from incoming origin too
+    const normalised = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(normalised)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
 
-// Handle preflight for all routes
-app.options('*', cors());
+// Apply CORS to all routes AND handle OPTIONS preflight with same config
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
